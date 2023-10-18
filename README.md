@@ -12,7 +12,7 @@ Coding enivrement: <a href="https://www.arduino.cc/en/software">Arduino IDE</a>
 Homework #1 (TBA)
 </summary>
 
-##COMING SOON :wink:
+## COMING SOON :wink:
 
 </details>
 
