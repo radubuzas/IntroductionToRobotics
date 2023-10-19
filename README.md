@@ -16,3 +16,5 @@ Homework #1 (TBA)
 
 </details>
 
+## License
+The code in this repo is licensed under the [MIT License](LICENSE)
