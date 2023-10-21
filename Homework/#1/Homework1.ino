@@ -21,24 +21,24 @@
 */
 
 //  defining each led its pin
-#define redLedPin   11
-#define greenLedPin 10
-#define blueLedPin  9
+const int redLedPin   = 11;
+const int greenLedPin = 10;
+const int blueLedPin  = 9;
 
 
 //  constants for the pins of input analog signal which will define the intensity of each led
-#define signalIntensityLevelForRedLedInput    A0
-#define signalIntensityLevelForGreenLedInput  A1
-#define signalIntensityLevelForBlueLedInput   A2
+const int signalIntensityLevelForRedLedInput    = A0;
+const int signalIntensityLevelForGreenLedInput  = A1;
+const int signalIntensityLevelForBlueLedInput   = A2;
 
 
 //  the function analogRead returns a 10 bit unsignet integer, so its minimum value is 0 and its maximum value its 1023
-#define minimumIntensityForInput 0
-#define maximumIntensityForInput  1023
+const int minimumIntensityForInput  = 0;
+const int maximumIntensityForInput  = 1023;
 
 //  the function analogWrite receives as parameter an 8 bit unsigned integer, min val = 0, max val = 255
-#define minimumIntensityForOutput 0
-#define maximumIntensityForOutput 255
+const int minimumIntensityForOutput = 0;
+const int maximumIntensityForOutput = 255;
 
 uint8_t redLedIntensity;
 uint8_t greenLedIntensity;
@@ -69,13 +69,9 @@ void loop() {
 
 
   //  maping values from [0, 1023] to [0, 255] (only integers)
-  redLedIntensity   = map(signalValueForRedLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput);
-  greenLedIntensity = map(signalValueForGreenLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput);
-  blueLedIntensity  = map(signalValueForBlueLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput);
-
-  analogWrite(redLedPin, redLedIntensity);
-  analogWrite(greenLedPin, greenLedIntensity);
-  analogWrite(blueLedPin, blueLedIntensity);
+  analogWrite(redLedPin, map(signalValueForRedLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput));
+  analogWrite(greenLedPin, map(signalValueForGreenLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput));
+  analogWrite(blueLedPin, map(signalValueForBlueLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput));
 
   if (millis() - last_record > 1000) {
     Serial.print("Red: ");
