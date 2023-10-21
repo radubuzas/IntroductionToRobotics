@@ -40,6 +40,9 @@ const int maximumIntensityForInput  = 1023;
 const int minimumIntensityForOutput = 0;
 const int maximumIntensityForOutput = 255;
 
+//  waiting to write data to serial
+const int timeInterval = 1000;
+
 uint8_t redLedIntensity;
 uint8_t greenLedIntensity;
 uint8_t blueLedIntensity;
@@ -73,7 +76,7 @@ void loop() {
   analogWrite(greenLedPin, map(signalValueForGreenLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput));
   analogWrite(blueLedPin, map(signalValueForBlueLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput));
 
-  if (millis() - last_record > 1000) {
+  if (millis() - last_record > timeInterval) {
     Serial.print("Red: ");
     Serial.println(signalValueForRedLed);
 
