@@ -31,7 +31,7 @@ Homework #1: Controlling RGB LED
 ![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/circuit.png)
 
 ![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/front.jpg)
-*
+
 ![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/back.jpg)
 
 :exclamation: If you are using a comman anode RGB LED, make sure to connect it to 5V instead of GND :exclamation:
@@ -39,7 +39,7 @@ Homework #1: Controlling RGB LED
 ### [DEMO](https://youtu.be/Rtv_YgjhBqY)
 [![](https://img.youtube.com/vi/Rtv_YgjhBqY/1.jpg)](https://youtu.be/Rtv_YgjhBqY)
 
-### [Code](https://github.com/radubuzas/IntroductionToRobotics/Homework/Homework1.ino)
+### [Code](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Homework/%231/Homework1.ino)
 
 
 </details>
