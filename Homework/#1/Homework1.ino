@@ -69,9 +69,13 @@ void loop() {
 
 
   //  maping values from [0, 1023] to [0, 255] (only integers)
-  analogWrite(redLedPin, map(signalValueForRedLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput));
-  analogWrite(greenLedPin, map(signalValueForGreenLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput));
-  analogWrite(blueLedPin, map(signalValueForBlueLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput));
+  redLedIntensity   = map(signalValueForRedLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput);
+  greenLedIntensity = map(signalValueForGreenLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput);
+  blueLedIntensity  = map(signalValueForBlueLed, minimumIntensityForInput, maximumIntensityForInput, minimumIntensityForOutput, maximumIntensityForOutput);
+
+  analogWrite(redLedPin, redLedIntensity);
+  analogWrite(greenLedPin, greenLedIntensity);
+  analogWrite(blueLedPin, blueLedIntensity);
 
   if (millis() - last_record > 1000) {
     Serial.print("Red: ");
