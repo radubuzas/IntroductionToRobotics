@@ -134,7 +134,6 @@ void loop()
             working = false;
             activateLED(elevatorCurrentFloor);
             if (closingGates == false) {
-                // digitalWrite(controlLEDGreen, HIGH);
                 controlLEDGreenState = true;
             }
             controlLEDRedState = LOW;
@@ -145,8 +144,8 @@ void loop()
             {
                 if (millis() - blinkTimmer > blinkRate) {
                     blinkTimmer = millis();
-                    // controlLEDGreenState = !controlLEDGreenState;
-                    // digitalWrite(controlLEDGreen, controlLEDGreenState);
+                    controlLEDGreenState = !controlLEDGreenState;
+                    digitalWrite(controlLEDGreen, controlLEDGreen);
                 }
             }
             else 
