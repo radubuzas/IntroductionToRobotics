@@ -1,3 +1,34 @@
+/*
+    Simulating Elevator with Arduino
+
+    In this Arduino sketch, I have created a simulation of a 3-floor elevator
+    control system. The project involves using various components, including
+    LEDs, buttons, and a buzzer, to mimic the operation of a real-world
+elevator.
+
+    Components Used:
+
+    * LEDs: I've utilized LEDs to represent the different floors of the elevator
+    and indicate the operational state of the elevator.
+
+    * Buttons: Buttons are employed to simulate the call buttons from each of the three floors, 
+    allowing users to request the elevator. 
+    
+    * Buzzer: An optional buzzer is integrated into the system to provide audio feedback for various events,
+    such as the elevator arriving at a desired floor or the doors closing and the elevator's movement.
+
+    Created 28 October 2023
+    By Radu-Gabriel Buzas
+    Modified 29 October 2023
+    By Radu-Gabriel Buzas
+
+    https://github.com/radubuzas/IntroductionToRobotics/Homework2
+*/
+
+#define NOTE_C4 262
+#define NOTE_A3 220
+#define NOTE_B3 247
+
 //  START OF PINS
 
 const int buttonPinFloor1 = 2;
@@ -12,12 +43,15 @@ const int LEDPinFloor3    = 12;
 const int controlLEDRed   = 10;
 const int controlLEDGreen = 13;
 
+const int buzzerPin = 9;
+
 //  END OF PINS
 
 const unsigned long debounceDelay     = 10;
-const unsigned long timeAtLevel       = 1600;
-const unsigned long timeBetweenLevels = 600;
+const unsigned long timeAtLevel       = 1400;
+const unsigned long timeBetweenLevels = 1000;
 const unsigned long blinkRate         = 200;
+const unsigned long arriveAtLevel     = 800;
 
 unsigned long startElevator;
 unsigned long blinkTimmer;
@@ -47,12 +81,15 @@ bool closingGates;
 
 bool updateVariables = true;
 
-struct floorNode{
-    floorNode * next = NULL;
-    byte floorNumber = 0;
+bool reachedLevel = false;
+
+struct floorNode
+{
+    floorNode *next        = NULL;
+    byte       floorNumber = 0;
 };
 
-floorNode * head = NULL;
+floorNode *head = NULL;
 
 void setup()
 {
@@ -72,11 +109,12 @@ void setup()
     digitalWrite(LEDPinFloor1, HIGH);
     digitalWrite(controlLEDGreen, HIGH);
 
-    head = (floorNode *) malloc(sizeof(floorNode));
+    // head = (floorNode *)malloc(sizeof(floorNode));
 }
 
 void loop()
 {
+
     int readingButtonFloor1 = !digitalRead(buttonPinFloor1);
     int readingButtonFloor2 = !digitalRead(buttonPinFloor2);
     int readingButtonFloor3 = !digitalRead(buttonPinFloor3);
@@ -99,6 +137,7 @@ void loop()
                 elevatorDesiredFloor = 1;
                 working              = true;
                 closingGates         = true;
+                reachedLevel         = false;
             }
         }
 
@@ -111,6 +150,7 @@ void loop()
                 elevatorDesiredFloor = 2;
                 working              = true;
                 closingGates         = true;
+                reachedLevel         = false;
             }
         }
 
@@ -123,36 +163,49 @@ void loop()
                 elevatorDesiredFloor = 3;
                 working              = true;
                 closingGates         = true;
+                reachedLevel         = false;
             }
         }
     }
-
     if (working)
     {
         if (elevatorDesiredFloor == elevatorCurrentFloor)
         {
-            working = false;
+            tone(buzzerPin, NOTE_B3);
+            if (reachedLevel == false)
+            {
+                startElevator = millis();
+                reachedLevel  = true;
+            }
+            if (millis() - startElevator > arriveAtLevel)
+            {
+                working = false;
+                noTone(buzzerPin);
+            }
             activateLED(elevatorCurrentFloor);
-            if (closingGates == false) {
+            if (closingGates == false)
+            {
                 controlLEDGreenState = true;
             }
-            controlLEDRedState = LOW;
+            controlLEDRedState = false;
         }
         else
         {
             if (closingGates)
             {
-                if (millis() - blinkTimmer > blinkRate) {
-                    blinkTimmer = millis();
+                tone(buzzerPin, NOTE_A3);
+                if (millis() - blinkTimmer > blinkRate)
+                {
+                    blinkTimmer          = millis();
                     controlLEDGreenState = !controlLEDGreenState;
-                    digitalWrite(controlLEDGreen, controlLEDGreen);
                 }
             }
-            else 
+            else
             {
-                controlLEDGreenState = false;
-                if (millis() - blinkTimmer > blinkRate) {
-                    blinkTimmer = millis();
+                tone(buzzerPin, NOTE_C4);
+                if (millis() - blinkTimmer > blinkRate)
+                {
+                    blinkTimmer        = millis();
                     controlLEDRedState = !controlLEDRedState;
                 }
             }
@@ -198,7 +251,7 @@ void loop()
                         startElevator   = millis();
                         state           = !state;
                         updateVariables = true;
-                        closingGates = false;
+                        closingGates    = false;
                     }
                 }
                 else
