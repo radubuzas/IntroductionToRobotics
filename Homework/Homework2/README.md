@@ -30,24 +30,15 @@ For this project, I implemented a 3-floor elevator control system simulation usi
 
 - **Debounce:** Remember to implement debounce for the buttons to avoid unintentional repeated button presses.
 
-
-## Common Mistakes to Avoid
-
-1. Using delay() instead of millis().
-2. Using non-descriptive variable names such as btn1, led1. Opt for more descriptive names, such as floor1Button, floor1LED (or maybe an use an array).
-3. Ignoring button debounce which may result in unintended elevator movement or multiple buzzer sounds.
-4. Forgetting to set the elevator's operational LED to blink when the elevator is moving.
-5. Overlooking the buzzer feedback for specific events such as doors closing or elevator movement.
-
 ## Setup
 
-![]()
+![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homework2/LED_view.jpg)
 
-![]()
+![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homework2/Buttons_view.jpg)
 
-![]()
+![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homework2/TOP_view.jpg)
 
-![]()
+![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homework2/TOP_view2.jpg)
 
 ## [DEMO](https://youtu.be/26ewqoCEFFs)
 [![](https://img.youtube.com/vi/26ewqoCEFFs/0.jpg)](https://youtu.be/26ewqoCEFFs)
