@@ -15,9 +15,12 @@ const int pinDP = 4;
 
 const unsigned long timeToBlink   = 400;
 const unsigned long debounceDelay = 200;
-const unsigned long timeToPlay    = 2000;
+const unsigned long timeToPlay    = 1500;
 unsigned long       lastDebounceTime;
 unsigned long       lastBlinkRecord;
+unsigned long       resetTimer;
+
+volatile unsigned long first;
 
 const int segSize = 8;
 int       index   = 0;
@@ -71,18 +74,40 @@ void setup()
 
 bool          blinkState;
 unsigned long timmer;
+bool          verifyLongPress;
 
 void loop()
 {
+    if (verifyLongPress)
+    {
+        bool value = digitalRead(pinSW);
+        if (value == true)
+        {
+            verifyLongPress = false;
+        }
+        else
+        {
+            if (micros() - first > timeToPlay * 1000)
+            {
+                reset           = true;
+                verifyLongPress = false;
+            }
+        }
+    }
+
     if (reset)
     {
-        current = 7;
-        for (int i = 0; i < segSize; ++i)
-        {
-            segmentActivation[i] = 0;
-            digitalWrite(segments[i], LOW);
+        timmer = micros();
+        bool value = digitalRead(pinSW);
+        if (value == HIGH){
+            current = 7;
+            for (int i = 0; i < segSize; ++i)
+            {
+                segmentActivation[i] = 0;
+                digitalWrite(segments[i], LOW);
+            }
+            reset = false;
         }
-        reset = false;
     }
 
     if (millis() - lastBlinkRecord > timeToBlink)
@@ -95,9 +120,11 @@ void loop()
 
     if (buttonState)
     {
-        timmer                     = millis();
+        if (first - timmer > 20000) {
+        verifyLongPress            = true;
         segmentActivation[current] = !segmentActivation[current];
         buttonState                = false;
+        }
     }
 
     //  {Up, Down, Left, Right} = {0, 1, 2, 3}
@@ -344,8 +371,6 @@ int  checkMovement()
     return -1;
 }
 
-volatile unsigned long first;
-
 void handleInterrupt()
 {
     static unsigned long lastInterrupt = 0;
@@ -353,7 +378,7 @@ void handleInterrupt()
 
     if (now - lastInterrupt > debounceDelay * 1000)
     {
-        first = now;
+        first       = now;
         buttonState = true;
     }
     lastInterrupt = now;
