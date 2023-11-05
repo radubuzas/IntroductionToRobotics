@@ -108,7 +108,7 @@ For this project, I implemented a 3-floor elevator control system simulation usi
 Homework #3: drawing on 7 segment display
 </summary>
 
-#  drawing on 7 segment display :video_game: :pencil2:
+# Drawing on 7 segment display :video_game: :pencil2:
 
 ## Description
 
