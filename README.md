@@ -152,8 +152,14 @@ This task involves implementing a segment display controlled by a joystick. The 
 
 ## Setup
 
-## [DEMO](https://youtu.be/26ewqoCEFFs)
-[![](https://img.youtube.com/vi/26ewqoCEFFs/0.jpg)]()
+![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homewrok3/top.jpeg)
+
+![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homewrok3/side.jpeg)
+
+![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homewrok3/front.jpeg)
+
+## [DEMO](https://youtu.be/dUXgIo1wGho)
+[![](https://img.youtube.com/vi/dUXgIo1wGho/0.jpg)](https://youtu.be/dUXgIo1wGho)
 
 
 
