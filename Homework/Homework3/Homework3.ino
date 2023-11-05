@@ -13,117 +13,78 @@ const int pinF  = 6;
 const int pinG  = 5;
 const int pinDP = 4;
 
+const int segSize      = 8;
+const int minThreshold = 100;
+const int maxThreshold = 900;
+
 const unsigned long timeToBlink   = 400;
 const unsigned long debounceDelay = 200;
-const unsigned long timeToPlay    = 1500;
-unsigned long       lastDebounceTime;
+const unsigned long timeToPlay    = 1200;
 unsigned long       lastBlinkRecord;
-unsigned long       resetTimer;
+unsigned long       timeOfResetMicroSec;
 
-volatile unsigned long first;
+volatile unsigned long timeOfFirstButtonPressMicroSec;
 
-const int segSize = 8;
-int       index   = 0;
+byte current = 7;
 
-bool          commonAnode = false; // Modify if you have common anode
-const int     noOfDigits  = 10;
-volatile bool state       = true;
-byte          dpState     = LOW;
-byte          swState     = LOW;
-int           xValue      = 0;
-int           yValue      = 0;
+bool commonAnode = false; // Modify if you have common anode
+bool buttonState;
+bool blinkState;
+bool verifyLongPress;
+bool xMoved;
+bool yMoved;
 
-bool joyMoved     = false;
-int  digit        = 0;
-int  minThreshold = 100;
-int  maxThreshold = 900;
-
-bool          buttonState;
 volatile bool reset;
 
-volatile int segments[segSize] = {pinA, pinB, pinC, pinD,
-                                  pinE, pinF, pinG, pinDP};
+volatile int segments[segSize] = {pinA, pinB, pinC, pinD, pinE, pinF, pinG, pinDP};
 
 bool segmentActivation[segSize] = /*
      0  1  2  3  4  5  6  7
      a  b  c  d  e  f  g  dp   */
     {0, 0, 0, 0, 0, 0, 0, 0};
 
-byte current = 7;
-
 void setup()
 {
     Serial.begin(9600);
-    // TODO: Initialize joystick pins and commonAnode
 
     pinMode(pinSW, INPUT_PULLUP);
     pinMode(pinX, INPUT);
     pinMode(pinY, INPUT);
 
     // Initialize all the pins
-    for (int i = 0; i < segSize; i++)
+    for (int i = 0; i < segSize; ++i)
     {
         pinMode(segments[i], OUTPUT);
     }
-    // TODO: Check if commonAnode should be modified here
 
     displayImage();
 
+    //  If the button is pressed, an interrupt will be triggered
     attachInterrupt(digitalPinToInterrupt(pinSW), handleInterrupt, FALLING);
 }
-
-bool          blinkState;
-unsigned long timmer;
-bool          verifyLongPress;
 
 void loop()
 {
     if (verifyLongPress)
     {
-        bool value = digitalRead(pinSW);
-        if (value == true)
-        {
-            verifyLongPress = false;
-        }
-        else
-        {
-            if (micros() - first > timeToPlay * 1000)
-            {
-                reset           = true;
-                verifyLongPress = false;
-            }
-        }
+        detectLongPress();
     }
 
     if (reset)
     {
-        timmer = micros();
-        bool value = digitalRead(pinSW);
-        if (value == HIGH){
-            current = 7;
-            for (int i = 0; i < segSize; ++i)
-            {
-                segmentActivation[i] = 0;
-                digitalWrite(segments[i], LOW);
-            }
-            reset = false;
-        }
+        initReset();
     }
 
-    if (millis() - lastBlinkRecord > timeToBlink)
-    {
-        blinkState      = !blinkState;
-        lastBlinkRecord = millis();
-        int pinSegment  = segments[current];
-        digitalWrite(pinSegment, blinkState);
-    }
+    blink();
 
     if (buttonState)
     {
-        if (first - timmer > 20000) {
-        verifyLongPress            = true;
-        segmentActivation[current] = !segmentActivation[current];
-        buttonState                = false;
+        if (timeOfResetMicroSec - timeOfFirstButtonPressMicroSec > debounceDelay * 1000)
+        //  Just a small debounce to not consider double press after the long press
+        {
+            verifyLongPress            = true;
+            segmentActivation[current] = !segmentActivation[current];
+            buttonState                = false;
         }
     }
 
@@ -143,14 +104,14 @@ void loop()
             current        = go_to;
             int pinSegment = segments[current];
             digitalWrite(pinSegment, blinkState);
-            lastBlinkRecord =
-                millis(); //  just to make the transition smoother!
+            lastBlinkRecord = millis(); //  just to make the transition is smoother!
         }
     }
 
     displayImage();
 }
 
+//  Iterates through the segments and writes the appropriate value
 void displayImage()
 {
     for (int i = 0; i < segSize; ++i)
@@ -162,173 +123,204 @@ void displayImage()
     }
 }
 
-//  decision is the direction of where the current segment is gonna go
-//  {Up, Down, Left, Right} = {0, 1, 2, 3}
-int makeDecision(byte decision)
+//  Turns the current segment on and off to make it blink at constant time
+//  interval (timeToBlink)
+void blink()
 {
-
-    switch (current)
+    if (millis() - lastBlinkRecord > timeToBlink)
     {
-        case 0: //  a
-            switch (decision)
-            {
-                case 0: //  NA
-                    break;
-                case 1:
-                    return 6;
-                    break;
-                case 2:
-                    return 5;
-                    break;
-                case 3:
-                    return 1;
-                    break;
-                default:
-                    Serial.println("BIG ERROR!");
-                    break;
-            }
-            return -1;
-        case 1: //  b
-            switch (decision)
-            {
-                case 0:
-                    return 0;
-                    break;
-                case 1:
-                    return 6;
-                    break;
-                case 2:
-                    return 5;
-                    break;
-                case 3: //  NA
-                    break;
-                default:
-                    Serial.println("BIG ERROR!");
-                    break;
-            }
-            return -1;
-        case 2: //  c
-            switch (decision)
-            {
-                case 0:
-                    return 6;
-                    break;
-                case 1:
-                    return 3;
-                    break;
-                case 2:
-                    return 4;
-                    break;
-                case 3:
-                    return 7;
-                    break;
-                default:
-                    Serial.println("BIG ERROR!");
-                    break;
-            }
-            return -1;
-        case 3: //  d
-            switch (decision)
-            {
-                case 0:
-                    return 6;
-                    break;
-                case 1: //  NA
-                    break;
-                case 2:
-                    return 4;
-                    break;
-                case 3:
-                    return 2;
-                    break;
-                default:
-                    Serial.println("BIG ERROR!");
-                    break;
-            }
-            return -1;
-        case 4: //  e
-            switch (decision)
-            {
-                case 0:
-                    return 6;
-                    break;
-                case 1:
-                    return 3;
-                    break;
-                case 2: //  NA
-                    break;
-                case 3:
-                    return 2;
-                    break;
-                default:
-                    Serial.println("BIG ERROR!");
-                    break;
-            }
-            return -1;
-        case 5: //  f
-            switch (decision)
-            {
-                case 0:
-                    return 0;
-                    break;
-                case 1:
-                    return 6;
-                    break;
-                case 2: //  NA
-                    break;
-                case 3:
-                    return 1;
-                    break;
-                default:
-                    Serial.println("BIG ERROR!");
-                    break;
-            }
-            return -1;
-        case 6: //  g
-            switch (decision)
-            {
-                case 0:
-                    return 0;
-                    break;
-                case 1:
-                    return 3;
-                    break;
-                case 2: //  NA
-                    break;
-                case 3: //  NA
-                    break;
-                default:
-                    Serial.println("BIG ERROR!");
-                    break;
-            }
-            return -1;
-        case 7: //  dp
-            switch (decision)
-            {
-                case 0: //  NA
-                    break;
-                case 1: //
-                    break;
-                case 2:
-                    return 2;
-                    break;
-                case 3: //  NA
-                    break;
-                default:
-                    Serial.println("BIG ERROR!");
-                    break;
-            }
-            return -1;
-        default:
-            Serial.println("BIG BIG ERROR!");
-            return -1;
-            break;
+        blinkState      = !blinkState;
+        lastBlinkRecord = millis();
+        int pinSegment  = segments[current];
+        digitalWrite(pinSegment, blinkState);
     }
 }
 
-bool xMoved;
-bool yMoved;
-int  checkMovement()
+//  Function that reads the value from the button pin, if the value is LOW/ 0
+//  (because of INPUT_PULLUP) then the button is still being pressed upon. The
+//  function checks in a cascadong effect if the button is still being pressed
+//  down from the momment of the first push.
+void detectLongPress()
+{
+    bool valueOfButton = digitalRead(pinSW);
+    if (valueOfButton == HIGH)
+    {
+        verifyLongPress = false; // No need to continue the 'cascading effect',
+                                 // so it won't enter this function next
+                                 // iteration if the button will not be pressed
+    }
+    else
+    {
+        if (micros() - timeOfFirstButtonPressMicroSec > timeToPlay * 1000)
+        {
+            reset           = true;
+            verifyLongPress = false; // no need to check anymore
+        }
+    }
+}
+
+//  Every segment will get value 0, the 'current' segment will be 'DP'
+void initReset()
+{
+    bool value = digitalRead(pinSW);
+    if (value == HIGH) //  The button is not pressed HIGH/ 1 (INPUT_PULLUP)
+    {
+        timeOfResetMicroSec = micros();
+        current             = 7;
+        for (int i = 0; i < segSize; ++i)
+        {
+            segmentActivation[i] = 0;
+            digitalWrite(segments[i], LOW);
+        }
+        reset = false; //  Will not enter this function in next iteration
+    }
+}
+
+//  decide what direction the current segment is gonna go
+//  {Up, Down, Left, Right} = {0, 1, 2, 3}
+int makeDecision(byte decision)
+{
+    // You can look it up, 'switch' instructions are WAY faster
+    // than 'if - else if' instructions.
+    switch (current)
+    {
+    case 0: //  a
+        switch (decision)
+        {
+        case 0: //  NA
+            break;
+        case 1:
+            return 6;
+        case 2:
+            return 5;
+        case 3:
+            return 1;
+        default:
+            Serial.println("BIG ERROR!");
+            break;
+        }
+        return -1;
+    case 1: //  b
+        switch (decision)
+        {
+        case 0:
+            return 0;
+        case 1:
+            return 6;
+        case 2:
+            return 5;
+        case 3: //  NA
+            break;
+        default:
+            Serial.println("BIG ERROR!");
+            break;
+        }
+        return -1;
+    case 2: //  c
+        switch (decision)
+        {
+        case 0:
+            return 6;
+        case 1:
+            return 3;
+        case 2:
+            return 4;
+        case 3:
+            return 7;
+        default:
+            Serial.println("BIG ERROR!");
+            break;
+        }
+        return -1;
+    case 3: //  d
+        switch (decision)
+        {
+        case 0:
+            return 6;
+        case 1: //  NA
+            break;
+        case 2:
+            return 4;
+        case 3:
+            return 2;
+        default:
+            Serial.println("BIG ERROR!");
+            break;
+        }
+        return -1;
+    case 4: //  e
+        switch (decision)
+        {
+        case 0:
+            return 6;
+        case 1:
+            return 3;
+        case 2: //  NA
+            break;
+        case 3:
+            return 2;
+        default:
+            Serial.println("BIG ERROR!");
+            break;
+        }
+        return -1;
+    case 5: //  f
+        switch (decision)
+        {
+        case 0:
+            return 0;
+        case 1:
+            return 6;
+        case 2: //  NA
+            break;
+        case 3:
+            return 1;
+        default:
+            Serial.println("BIG ERROR!");
+            break;
+        }
+        return -1;
+    case 6: //  g
+        switch (decision)
+        {
+        case 0:
+            return 0;
+        case 1:
+            return 3;
+        case 2: //  NA
+            break;
+        case 3: //  NA
+            break;
+        default:
+            Serial.println("BIG ERROR!");
+            break;
+        }
+        return -1;
+    case 7: //  dp
+        switch (decision)
+        {
+        case 0: //  NA
+            break;
+        case 1: //
+            break;
+        case 2:
+            return 2;
+        case 3: //  NA
+            break;
+        default:
+            Serial.println("BIG ERROR!");
+            break;
+        }
+        return -1;
+    default:
+        Serial.println("BIG BIG ERROR!");
+        return -1;
+        break;
+    }
+}
+
+//  This function checks the movement of the joystick
+int checkMovement()
 {
     int xRead = analogRead(pinY);
     int yRead = analogRead(pinX);
@@ -371,6 +363,7 @@ int  checkMovement()
     return -1;
 }
 
+//  When the button is pressed, this ISR will be triggered
 void handleInterrupt()
 {
     static unsigned long lastInterrupt = 0;
@@ -378,8 +371,8 @@ void handleInterrupt()
 
     if (now - lastInterrupt > debounceDelay * 1000)
     {
-        first       = now;
-        buttonState = true;
+        timeOfFirstButtonPressMicroSec = now;
+        buttonState                    = true;
     }
     lastInterrupt = now;
 }
