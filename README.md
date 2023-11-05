@@ -12,19 +12,19 @@ Coding environment: <a href="https://www.arduino.cc/en/software">Arduino IDE</a>
 Homework #1: Controlling RGB LED
 </summary>
 
-## Controlling RGB LED :rotating_light:
+# Controlling RGB LED :rotating_light:
 
-### Components
+## Components
 * Arduino Uno
 * RGB LED 
 * Potentiometers
 * Resistors and wires
 
-### Technical Task
+## Technical Task
 
 * Use a separate potentiometer for controlling each color of the RGB LED: Red, Green, and Blue.  This control must leverage digital electronics.  Specifically, you need to read the potentiometer’s value with Arduino and then write a mapped value to the LED pins.
 
-### Setup
+## Setup
 
 :exclamation: The configuration described below corresponds to an RGB LED with a common cathode.
 
@@ -36,10 +36,10 @@ Homework #1: Controlling RGB LED
 
 :exclamation: If you are using a comman anode RGB LED, make sure to connect it to 5V instead of GND :exclamation:
 
-### [DEMO](https://youtu.be/Rtv_YgjhBqY)
+## [DEMO](https://youtu.be/Rtv_YgjhBqY)
 [![](https://img.youtube.com/vi/Rtv_YgjhBqY/0.jpg)](https://youtu.be/Rtv_YgjhBqY)
 
-### [Code](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Homework/%231/Homework1.ino)
+## [Code](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Homework/%231/Homework1.ino)
 
 
 </details>
@@ -99,6 +99,65 @@ For this project, I implemented a 3-floor elevator control system simulation usi
 
 ## [Code](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Homework/Homework2/Homework2.ino)
 
+
+</details>
+
+<details>
+
+<summary>
+Homework #3: drawing on 7 segment display
+</summary>
+
+#  drawing on 7 segment display :video_game: :pencil2:
+
+## Description
+
+This task focuses on using a joystick to control the position of a 7-segment display with natural movement. The segment will smoothly transition to neighboring segments, creating a user-friendly experience, and avoiding any unintended "walls" or invalid moves. Users can interact with the display by drawing or selecting specific segments using the joystick input.
+
+## Components
+
+- Arduino Uno
+- 7-segment display
+- Joystick
+- Resistors and wires
+
+## Technical Task
+
+This task involves implementing a segment display controlled by a joystick. The display initializes with the decimal point (DP) segment blinking. The system provides movement and segment state control using the joystick and button, following specific rules:
+
+- **Initial Position**: The display starts with the decimal point (DP) segment blinking.
+
+- **Joystick Control**: Use the joystick to move the current blinking segment to its neighboring segments, following the provided movement table.
+
+- **Blinking Segment**: The current segment always blinks, regardless of its ON or OFF state, creating a visually engaging display.
+
+- **Button Functionality**:
+  - **Short Press**: Toggles the state of the current segment between ON and OFF.
+  - **Long Press**: Resets the entire display, turning all segments OFF, and moving the current position back to the decimal point (DP).
+
+
+* Mapping each segment to its neighbours
+
+| Current Segment     | UP          | DOWN        | LEFT        | RIGHT       |
+| ----------- | ----------- | ----------- | ----------- | ----------- |
+| a           | N/A         | g           | f           | b           |
+| b           | a           | g           | f           | N/A         |
+| c           | g           | d           | e           | dp          |
+| d           | g           | N/A         | e           | c           |
+| e           | g           | d           | N/A         | c           |    
+| f           | a           | g           | N/A         | b           |
+| g           | a           | d           | N/A         | N/A         |
+| dp          | N/A         | N/A         | c           | N/A         |
+
+
+## Setup
+
+## [DEMO](https://youtu.be/26ewqoCEFFs)
+[![](https://img.youtube.com/vi/26ewqoCEFFs/0.jpg)]()
+
+
+
+## [Code](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Homework/Homework3/Homework3.ino)
 
 </details>
 
