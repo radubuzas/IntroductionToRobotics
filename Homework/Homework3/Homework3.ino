@@ -1,3 +1,30 @@
+/*
+    Controlling RGB LED via analog input
+
+    This code controls a 7-segment display using a joystick and a button. The 7-segment display is
+    composed of eight segments, and each segment can be individually toggled on and off. The
+    joystick is used to navigate and select the active segment, while the button is used to toggle
+    the segment's state between on and off. A long press of the button resets the display, turning
+    off all segments and setting the initial position to the decimal point. The code also handles
+    segment blinking and ensures smooth transitions between segments. The code uses digital and
+    analog pins for input and output.
+
+    The circuit connections are as follows:
+    * Connect each of the 8 non-ground pins of the 7-segment display according to the constants
+    specified below. In this example, a 7-segment display with a common cathode is used, and the pins
+    are mapped to the constants pinA, pinB, pinC, pinD, pinE, pinF, pinG, and pinDP.
+    * Connect the joystick as indicated by the constants below: pinSW is the digital pin linked to
+    the switch output, pinX is the analog pin linked to the X output, and pinY is the analog pin
+    associated with the Y output.
+
+
+
+    Created 5 November 2023
+    By Radu-Gabriel Buzas
+
+    https://github.com/radubuzas/IntroductionToRobotics/Homework3
+*/
+
 // Declare all the joystick pins
 const int pinSW = 2;  // Digital pin connected to switch output
 const int pinX  = A0; // A0 - Analog pin connected to X output
@@ -16,6 +43,7 @@ const int pinDP = 4;
 const int segSize      = 8;
 const int minThreshold = 100;
 const int maxThreshold = 900;
+const int startOnDP    = 7;
 
 const unsigned long timeToBlink   = 400;
 const unsigned long debounceDelay = 200;
@@ -25,7 +53,7 @@ unsigned long       timeOfResetMicroSec;
 
 volatile unsigned long timeOfFirstButtonPressMicroSec;
 
-byte current = 7;
+byte current = startOnDP;
 
 bool commonAnode = false; // Modify if you have common anode
 bool buttonState;
@@ -91,20 +119,20 @@ void loop()
     //  {Up, Down, Left, Right} = {0, 1, 2, 3}
     int direction = checkMovement();
 
-    if (direction >= 0)
+    if (direction >= 0) //  joystick has been moved
     {
         Serial.println(direction);
-        int lastSegmentPin = segments[current];
-        int go_to          = makeDecision(direction);
+        int lastSegmentPin = segments[current];       // The segment that was selected
+        int go_to          = makeDecision(direction); // Where to move current segment
         Serial.println(go_to);
-        if (go_to >= 0)
+        if (go_to >= 0) // if the request is valid
         {
-            digitalWrite(lastSegmentPin, LOW);
-            blinkState     = true;
+            digitalWrite(lastSegmentPin, LOW); // just stop the blinking
+            blinkState     = true;             // the current segment should start blinking
             current        = go_to;
             int pinSegment = segments[current];
-            digitalWrite(pinSegment, blinkState);
-            lastBlinkRecord = millis(); //  just to make the transition is smoother!
+            digitalWrite(pinSegment, HIGH); // the new current segment should start blinking
+            lastBlinkRecord = millis();     // just to make the transition is smoother!
         }
     }
 
@@ -166,7 +194,7 @@ void initReset()
     if (value == HIGH) //  The button is not pressed HIGH/ 1 (INPUT_PULLUP)
     {
         timeOfResetMicroSec = micros();
-        current             = 7;
+        current             = startOnDP;
         for (int i = 0; i < segSize; ++i)
         {
             segmentActivation[i] = 0;
@@ -187,7 +215,7 @@ int makeDecision(byte decision)
     case 0: //  a
         switch (decision)
         {
-        case 0: //  NA
+        case 0: //  No Change
             break;
         case 1:
             return 6;
@@ -196,7 +224,7 @@ int makeDecision(byte decision)
         case 3:
             return 1;
         default:
-            Serial.println("BIG ERROR!");
+            Serial.println("decision has wrong value");
             break;
         }
         return -1;
@@ -209,10 +237,10 @@ int makeDecision(byte decision)
             return 6;
         case 2:
             return 5;
-        case 3: //  NA
+        case 3: //  No Change
             break;
         default:
-            Serial.println("BIG ERROR!");
+            Serial.println("decision has wrong value");
             break;
         }
         return -1;
@@ -228,7 +256,7 @@ int makeDecision(byte decision)
         case 3:
             return 7;
         default:
-            Serial.println("BIG ERROR!");
+            Serial.println("decision has wrong value");
             break;
         }
         return -1;
@@ -237,14 +265,14 @@ int makeDecision(byte decision)
         {
         case 0:
             return 6;
-        case 1: //  NA
+        case 1: //  No Change
             break;
         case 2:
             return 4;
         case 3:
             return 2;
         default:
-            Serial.println("BIG ERROR!");
+            Serial.println("decision has wrong value");
             break;
         }
         return -1;
@@ -255,12 +283,12 @@ int makeDecision(byte decision)
             return 6;
         case 1:
             return 3;
-        case 2: //  NA
+        case 2: //  No Change
             break;
         case 3:
             return 2;
         default:
-            Serial.println("BIG ERROR!");
+            Serial.println("decision has wrong value");
             break;
         }
         return -1;
@@ -271,12 +299,12 @@ int makeDecision(byte decision)
             return 0;
         case 1:
             return 6;
-        case 2: //  NA
+        case 2: //  No Change
             break;
         case 3:
             return 1;
         default:
-            Serial.println("BIG ERROR!");
+            Serial.println("decision has wrong value");
             break;
         }
         return -1;
@@ -287,33 +315,33 @@ int makeDecision(byte decision)
             return 0;
         case 1:
             return 3;
-        case 2: //  NA
+        case 2: //  No Change
             break;
-        case 3: //  NA
+        case 3: //  No Change
             break;
         default:
-            Serial.println("BIG ERROR!");
+            Serial.println("decision has wrong value");
             break;
         }
         return -1;
     case 7: //  dp
         switch (decision)
         {
-        case 0: //  NA
+        case 0: //  No Change
             break;
         case 1: //
             break;
         case 2:
             return 2;
-        case 3: //  NA
+        case 3: //  No Change
             break;
         default:
-            Serial.println("BIG ERROR!");
+            Serial.println("decision has wrong value");
             break;
         }
         return -1;
     default:
-        Serial.println("BIG BIG ERROR!");
+        Serial.println("current has wrong value");
         return -1;
         break;
     }
