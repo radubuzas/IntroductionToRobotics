@@ -11,8 +11,8 @@
 
     The circuit connections are as follows:
     * Connect each of the 8 non-ground pins of the 7-segment display according to the constants
-    specified below. In this example, a 7-segment display with a common cathode is used, and the pins
-    are mapped to the constants pinA, pinB, pinC, pinD, pinE, pinF, pinG, and pinDP.
+    specified below. In this example, a 7-segment display with a common cathode is used, and the
+   pins are mapped to the constants pinA, pinB, pinC, pinD, pinE, pinF, pinG, and pinDP.
     * Connect the joystick as indicated by the constants below: pinSW is the digital pin linked to
     the switch output, pinX is the analog pin linked to the X output, and pinY is the analog pin
     associated with the Y output.
@@ -24,6 +24,22 @@
 
     https://github.com/radubuzas/IntroductionToRobotics/Homework3
 */
+
+#define SEGMENT_A  0
+#define SEGMENT_B  1
+#define SEGMENT_C  2
+#define SEGMENT_D  3
+#define SEGMENT_E  4
+#define SEGMENT_F  5
+#define SEGMENT_G  6
+#define SEGMENT_DP 7
+
+#define UP    0
+#define DOWN  1
+#define LEFT  2
+#define RIGHT 3
+
+#define ERROR -1
 
 // Declare all the joystick pins
 const int pinSW = 2;  // Digital pin connected to switch output
@@ -43,7 +59,7 @@ const int pinDP = 4;
 const int segSize      = 8;
 const int minThreshold = 100;
 const int maxThreshold = 900;
-const int startOnDP    = 7;
+const int startOnDP    = SEGMENT_DP;
 
 const unsigned long timeToBlink   = 400;
 const unsigned long debounceDelay = 200;
@@ -119,13 +135,13 @@ void loop()
     //  {Up, Down, Left, Right} = {0, 1, 2, 3}
     int direction = checkMovement();
 
-    if (direction >= 0) //  joystick has been moved
+    if (direction != ERROR) //  joystick has been moved
     {
         Serial.println(direction);
         int lastSegmentPin = segments[current];       // The segment that was selected
         int go_to          = makeDecision(direction); // Where to move current segment
         Serial.println(go_to);
-        if (go_to >= 0) // if the request is valid
+        if (go_to != ERROR) // if the request is valid
         {
             digitalWrite(lastSegmentPin, LOW); // just stop the blinking
             blinkState     = true;             // the current segment should start blinking
@@ -212,137 +228,137 @@ int makeDecision(byte decision)
     // than 'if - else if' instructions.
     switch (current)
     {
-    case 0: //  a
+    case SEGMENT_A: //  a
         switch (decision)
         {
-        case 0: //  No Change
+        case UP: //  No Change
             break;
-        case 1:
-            return 6;
-        case 2:
-            return 5;
-        case 3:
-            return 1;
+        case DOWN:
+            return SEGMENT_G;
+        case LEFT:
+            return SEGMENT_F;
+        case RIGHT:
+            return SEGMENT_B;
         default:
             Serial.println("decision has wrong value");
             break;
         }
-        return -1;
-    case 1: //  b
+        return ERROR;
+    case SEGMENT_B: //  b
         switch (decision)
         {
-        case 0:
-            return 0;
-        case 1:
-            return 6;
-        case 2:
-            return 5;
-        case 3: //  No Change
-            break;
-        default:
-            Serial.println("decision has wrong value");
-            break;
-        }
-        return -1;
-    case 2: //  c
-        switch (decision)
-        {
-        case 0:
-            return 6;
-        case 1:
-            return 3;
-        case 2:
-            return 4;
-        case 3:
-            return 7;
-        default:
-            Serial.println("decision has wrong value");
-            break;
-        }
-        return -1;
-    case 3: //  d
-        switch (decision)
-        {
-        case 0:
-            return 6;
-        case 1: //  No Change
-            break;
-        case 2:
-            return 4;
-        case 3:
-            return 2;
-        default:
-            Serial.println("decision has wrong value");
-            break;
-        }
-        return -1;
-    case 4: //  e
-        switch (decision)
-        {
-        case 0:
-            return 6;
-        case 1:
-            return 3;
-        case 2: //  No Change
-            break;
-        case 3:
-            return 2;
-        default:
-            Serial.println("decision has wrong value");
-            break;
-        }
-        return -1;
-    case 5: //  f
-        switch (decision)
-        {
-        case 0:
-            return 0;
-        case 1:
-            return 6;
-        case 2: //  No Change
-            break;
-        case 3:
-            return 1;
-        default:
-            Serial.println("decision has wrong value");
-            break;
-        }
-        return -1;
-    case 6: //  g
-        switch (decision)
-        {
-        case 0:
-            return 0;
-        case 1:
-            return 3;
-        case 2: //  No Change
-            break;
-        case 3: //  No Change
+        case UP:
+            return SEGMENT_A;
+        case DOWN:
+            return SEGMENT_G;
+        case LEFT:
+            return SEGMENT_F;
+        case RIGHT: //  No Change
             break;
         default:
             Serial.println("decision has wrong value");
             break;
         }
-        return -1;
-    case 7: //  dp
+        return ERROR;
+    case SEGMENT_C: //  c
         switch (decision)
         {
-        case 0: //  No Change
+        case UP:
+            return SEGMENT_G;
+        case DOWN:
+            return SEGMENT_D;
+        case LEFT:
+            return SEGMENT_E;
+        case RIGHT:
+            return SEGMENT_DP;
+        default:
+            Serial.println("decision has wrong value");
             break;
-        case 1: //
+        }
+        return ERROR;
+    case SEGMENT_D: //  d
+        switch (decision)
+        {
+        case UP:
+            return SEGMENT_G;
+        case DOWN: //  No Change
             break;
-        case 2:
-            return 2;
-        case 3: //  No Change
+        case LEFT:
+            return SEGMENT_E;
+        case RIGHT:
+            return SEGMENT_C;
+        default:
+            Serial.println("decision has wrong value");
+            break;
+        }
+        return ERROR;
+    case SEGMENT_E: //  e
+        switch (decision)
+        {
+        case UP:
+            return SEGMENT_G;
+        case DOWN:
+            return SEGMENT_D;
+        case LEFT: //  No Change
+            break;
+        case RIGHT:
+            return SEGMENT_C;
+        default:
+            Serial.println("decision has wrong value");
+            break;
+        }
+        return ERROR;
+    case SEGMENT_F: //  f
+        switch (decision)
+        {
+        case UP:
+            return SEGMENT_A;
+        case DOWN:
+            return SEGMENT_G;
+        case LEFT: //  No Change
+            break;
+        case RIGHT:
+            return SEGMENT_B;
+        default:
+            Serial.println("decision has wrong value");
+            break;
+        }
+        return ERROR;
+    case SEGMENT_G: //  g
+        switch (decision)
+        {
+        case UP:
+            return SEGMENT_A;
+        case DOWN:
+            return SEGMENT_D;
+        case LEFT: //  No Change
+            break;
+        case RIGHT: //  No Change
             break;
         default:
             Serial.println("decision has wrong value");
             break;
         }
-        return -1;
+        return ERROR;
+    case SEGMENT_DP: //  dp
+        switch (decision)
+        {
+        case UP: //  No Change
+            break;
+        case DOWN: //
+            break;
+        case LEFT:
+            return SEGMENT_C;
+        case RIGHT: //  No Change
+            break;
+        default:
+            Serial.println("decision has wrong value");
+            break;
+        }
+        return ERROR;
     default:
         Serial.println("current has wrong value");
-        return -1;
+        return ERROR;
         break;
     }
 }
@@ -388,7 +404,7 @@ int checkMovement()
     }
 
     delay(1);
-    return -1;
+    return ERROR;
 }
 
 //  When the button is pressed, this ISR will be triggered
