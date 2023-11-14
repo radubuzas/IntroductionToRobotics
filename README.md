@@ -218,11 +218,11 @@ Creating a project that utilizes a 4-digit 7-segment display and three buttons t
 
 ## Setup
 
-![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homewrok4/top.jpeg)
+![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homework4/top.jpeg)
 
-![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homewrok4/right_side.jpeg)
+![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homework4/right_side.jpeg)
 
-![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homewrok4/left_side.jpeg)
+![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homework4/left_side.jpeg)
 
 ![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homework4/front.jpeg)
 
