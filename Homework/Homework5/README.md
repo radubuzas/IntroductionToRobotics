@@ -1,4 +1,4 @@
-# Smart Environment Monitor and Logger :robot:
+# Smart Environment Monitor and Logger :robot::ledger:
 
 ## Description
 
