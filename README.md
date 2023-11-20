@@ -236,10 +236,10 @@ Creating a project that utilizes a 4-digit 7-segment display and three buttons t
 <details>
 
 <summary>
-   Smart Environment Monitor and Logger
-<summary>
+   Homework #5: Smart Environment Monitor and Logger
+</summary>
 
-# Smart Environment Monitor and Logger 🤖📒
+# Smart Environment Monitor and Logger :robot::ledger:
 
 ## Description
 
