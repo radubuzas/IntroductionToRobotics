@@ -396,7 +396,7 @@ void enterValuesSensors(long value)
         EEPROM.put(samplingPeriodIdx, samplingPeriodSec);
         break;
     case 2:
-        if (value > 1023 or value < 0)
+        if (value > 100 or value < 0)
         {
             Serial.println(F("[Sound Sensor] INVALID INPUT!\n"));
             handleSubmenuSensor('2');
