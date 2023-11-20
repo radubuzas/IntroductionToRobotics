@@ -66,6 +66,6 @@ This project involves the development of a Smart Environment Monitor and Logger 
 
 
 ## [DEMO](https://youtube_link_here)
-[![](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://youtube_link_here)
+[![](https://img.youtube.com/vi/baLxZFGrtDU/0.jpg)](https://youtu.be/baLxZFGrtDU)
 
-## [Code](https://github.com/radubuzas/IntroductionToRobotics/tree/master/Homework/Homework5)
+## [Code](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Homework/Homework5/Homework5.ino)
