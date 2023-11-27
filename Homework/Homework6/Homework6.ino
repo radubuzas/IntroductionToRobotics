@@ -23,17 +23,23 @@ const int pinSW = 2;
 const int minThreshold = 100;
 const int maxThreshold = 900;
 
-const unsigned long blinkingDelayPlayer = 500;
+const unsigned long blinkingDelayPlayer = 700;
 const unsigned long blinkingDelayBullet = 75;
 
 const unsigned long debounceDelay = 200;
 const unsigned long travelTime    = 200;
 
+const unsigned long timeForInitialImageDisplay = 2000;
+
 unsigned long lastBlinkPlayer;
 unsigned long lastBlinkBullet;
 unsigned long lastBulletTravel;
+unsigned long lastRecordStart;
 
 bool bulletRequested;
+bool showStartImage = true;
+
+int score = 0;
 
 struct position
 {
@@ -44,7 +50,8 @@ struct position
 struct movingObject
 {
     struct position position;
-    byte            headingTo;
+
+    byte headingTo;
 };
 
 struct movingObject player;
@@ -54,6 +61,12 @@ struct movingObject *bullet;
 // int TAMPON;
 
 bool matrix[matrixSize][matrixSize];
+
+const byte IMAGE[matrixSize] = {0b00000000, 0b10010111, 0b10010010, 0b11110010,
+                                0b11110010, 0b10010010, 0b10010111, 0b00000000};
+
+const byte HEART[matrixSize] = {0b01100110, 0b11111111, 0b11111111, 0b11111111,
+                                0b11111111, 0b01111110, 0b00111100, 0b00011000};
 
 void setup()
 {
@@ -66,22 +79,28 @@ void setup()
     pinMode(pinX, INPUT);
     pinMode(pinY, INPUT);
 
-    initBorder();
-
-    player.position.row    = 6;
-    player.position.column = 1;
-
-    player.headingTo = RIGHT;
-
-    matrix[player.position.row][player.position.column] = 1;
+    randomSeed(analogRead(0));
 
     attachInterrupt(digitalPinToInterrupt(pinSW), handleInterrupt, FALLING);
+
+    lastRecordStart = millis();
 
     Serial.begin(9600);
 }
 
 void loop()
 {
+    if (showStartImage)
+    {
+        showImage();
+        return;
+    }
+
+    if (score == 0){
+        reset();
+        return;
+    }
+
     blinkPlayer();
     showMatrix();
 
@@ -98,6 +117,41 @@ void loop()
         generateBullet();
 }
 
+
+//  Displays initial image
+void showImage()
+{
+    if (millis() - lastRecordStart > timeForInitialImageDisplay || bulletRequested == true)
+    {
+        showStartImage  = false;
+        bulletRequested = false;
+        initMap();
+    }
+    for (int row = 0; row < matrixSize; ++row)
+    {
+        lc.setRow(0, row, IMAGE[row]);
+    }
+}
+
+
+//  Upon pressing the button, the map will reset
+void reset()
+{
+    if (bulletRequested)
+    {
+        showStartImage  = true;
+        lastRecordStart = millis();
+        bulletRequested = false;
+        return;
+    }
+
+    for (int row = 0; row < matrixSize; ++row)
+    {
+        lc.setRow(0, row, HEART[row]);
+    }
+}
+
+//  Makes the player blink ON and OFF
 void blinkPlayer()
 {
     if (millis() - lastBlinkPlayer > blinkingDelayPlayer)
@@ -110,11 +164,12 @@ void blinkPlayer()
     }
 }
 
+//  Makes the bullet blink ON and OFF. Remember that there is only one bullet
 void blinkBullet()
 {
     if (bullet == nullptr)
         return;
-        
+
     if (millis() - lastBlinkBullet > blinkingDelayBullet)
     {
         int bulletX              = bullet->position.row;
@@ -125,6 +180,7 @@ void blinkBullet()
     }
 }
 
+//  Will display to current configuration of the matrix
 void showMatrix()
 {
     for (int i = 0; i < matrixSize; i++)
@@ -136,16 +192,26 @@ void showMatrix()
     }
 }
 
-void initBorder()
+// Generates random structures 
+void initMap()
 {
     for (int i = 0; i < matrixSize; ++i)
     {
-        matrix[0][i]              = 1; //  first row
-        matrix[matrixSize - 1][i] = 1; //  last row
-
-        matrix[i][0]              = 1; //  first column
-        matrix[i][matrixSize - 1] = 1; //  last column
+        for (int j = 0; j < matrixSize; ++j)
+        {
+            matrix[i][j] = random(10) % 2;
+            score += matrix[i][j];
+        }
     }
+
+    player.position.row    = random(40) % 8;
+    player.position.column = random(40) % 8;
+
+    player.headingTo = RIGHT;
+
+    score -= matrix[player.position.row][player.position.column];
+
+    matrix[player.position.row][player.position.column] = 1;
 }
 
 //  This function checks the movement of the joystick
@@ -195,6 +261,8 @@ byte checkMovement()
     return NO_MOVEMENT;
 }
 
+
+// Will go according to the controller
 void movePlayer(byte move)
 {
     player.headingTo = move;
@@ -202,7 +270,10 @@ void movePlayer(byte move)
     byte newPosRow    = player.position.row + (move == UP) - (move == DOWN);
     byte newPosColumn = player.position.column + (move == RIGHT) - (move == LEFT);
 
-    if (newPosRow < 1 || newPosRow > 6 || newPosColumn < 1 || newPosColumn > 6) //  invalid action
+    if (newPosRow < 0 || newPosRow > 7 || newPosColumn < 0 || newPosColumn > 7) //  invalid action
+        return;
+
+    if (playerCollision(newPosRow, newPosColumn))
         return;
 
     matrix[player.position.row][player.position.column] = 0;
@@ -215,6 +286,17 @@ void movePlayer(byte move)
     lastBlinkPlayer = millis(); //  smooth transition
 }
 
+//  check is the player will hit a wall
+bool playerCollision(byte row, byte column)
+{
+    if (matrix[row][column] == 1) //  invalid action
+    {
+        return true;
+    }
+    return false;
+}
+
+// creating a bullet object based on the player's position and orientation
 void generateBullet()
 {
     bulletRequested = false;
@@ -235,7 +317,7 @@ void generateBullet()
         return;
     }
 
-    if (checkCollision(tempRow, tempColumn))
+    if (bulletCollision(tempRow, tempColumn))
         return;
 
     bullet->position.row    = tempRow;
@@ -253,10 +335,6 @@ void bulletTravel()
 
         matrix[bullet->position.row][bullet->position.column] = 0;
 
-        // Serial.print("Row: "), Serial.println(bullet->position.row);
-        // Serial.print("Column: "), Serial.println(bullet->position.column);
-        // Serial.println();
-
         byte tempRow    = bullet->position.row + (headingTo == UP) - (headingTo == DOWN);
         byte tempColumn = bullet->position.column + (headingTo == RIGHT) - (headingTo == LEFT);
 
@@ -269,7 +347,7 @@ void bulletTravel()
             return;
         }
 
-        if (checkCollision(tempRow, tempColumn))
+        if (bulletCollision(tempRow, tempColumn))
             return;
 
         matrix[bullet->position.row][bullet->position.column] = 0;
@@ -281,10 +359,12 @@ void bulletTravel()
     }
 }
 
-bool checkCollision(byte row, byte column)
+// the bullet will hit a wall
+bool bulletCollision(byte row, byte column)
 {
     if (matrix[row][column] == 1) //  invalid action
     {
+        --score;    //  trying to scount the broken walls
         free(bullet);
         bullet = nullptr;
 
