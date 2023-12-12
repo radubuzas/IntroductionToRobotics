@@ -60,7 +60,7 @@ Welcome to Tank Battle, an exciting game where you take on the role of a tank co
 ![](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Assets/Homework6/back_side.jpeg)
 
 
-## [DEMO](https://youtube_link_here)
+## [DEMO](https://youtu.be/f4F1pNUXKq0)
 [![](https://img.youtube.com/vi/f4F1pNUXKq0/0.jpg)](https://youtu.be/f4F1pNUXKq0)
 
 ## [Code](https://github.com/radubuzas/IntroductionToRobotics/blob/master/Homework/Homework6/Homework6.ino)
